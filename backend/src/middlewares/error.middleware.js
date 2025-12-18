@@ -3,12 +3,12 @@ module.exports = (err, res) => {
   const payload = {
     error: {
       status,
-      message: err.message || 'Internal Server Error',
-      timestamp: new Date().toISOString()
-    }
+      message: err.message || "Internal Server Error",
+      timestamp: new Date().toISOString(),
+    },
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     payload.error.stack = err.stack;
     if (err.details) payload.error.details = err.details;
   }
