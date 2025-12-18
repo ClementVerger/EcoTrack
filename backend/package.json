@@ -10,7 +10,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "format": "prettier . --write",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "echo \"No build step for backend\""
   },
   "keywords": [],
   "author": "",

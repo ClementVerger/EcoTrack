@@ -6,10 +6,10 @@ services:
       target: development
     container_name: ecotrack-backend
     ports:
-      - "8080:8080"
+      - "3000:3000"
     environment:
       NODE_ENV: development
-      PORT: 8080
+      PORT: 3000
     volumes:
       - ./backend:/app
       - /app/node_modules
