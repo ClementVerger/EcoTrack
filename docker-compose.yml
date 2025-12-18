@@ -1,0 +1,51 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+      target: development
+    container_name: ecotrack-backend
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend.Dockerfile
+      target: development
+    container_name: ecotrack-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+  # optionnel DB
+  db:
+    image: postgres:16-alpine
+    container_name: ecotrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ecotrack
+      POSTGRES_PASSWORD: ecotrack
+      POSTGRES_DB: ecotrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecotrack_pgdata:/var/lib/postgresql/data
+
+volumes:
+  ecotrack_pgdata:
