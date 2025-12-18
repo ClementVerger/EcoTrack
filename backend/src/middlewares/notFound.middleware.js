@@ -5,7 +5,7 @@ module.exports = (req, res) => {
       message: 'Not Found',
       path: req.originalUrl,
       method: req.method,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   });
 };

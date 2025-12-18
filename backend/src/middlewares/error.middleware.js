@@ -4,13 +4,15 @@ module.exports = (err, res) => {
     error: {
       status,
       message: err.message || 'Internal Server Error',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   };
 
   if (process.env.NODE_ENV === 'development') {
     payload.error.stack = err.stack;
-    if (err.details) payload.error.details = err.details;
+    if (err.details) {
+      payload.error.details = err.details;
+    }
   }
 
   res.status(status).json(payload);
