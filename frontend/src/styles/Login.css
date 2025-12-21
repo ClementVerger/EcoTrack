@@ -1,0 +1,5 @@
+.login-page{display:flex;justify-content:center;padding:2rem}
+.login-form{width:320px;display:flex;flex-direction:column;gap:0.75rem}
+.login-form input{padding:0.5rem;border:1px solid #ccc;border-radius:4px}
+.login-error{color:#b00020;background:#ffecec;padding:0.5rem;border-radius:4px}
+button[disabled]{opacity:0.6}
