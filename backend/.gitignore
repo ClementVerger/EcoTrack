@@ -34,9 +34,7 @@ backend/node_modules/
 # ======================
 # Tests
 # ======================
-coverage/
-*.test.js
-*.spec.js
+
 
 # ======================
 # Docker
