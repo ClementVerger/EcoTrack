@@ -1,4 +1,4 @@
-module.exports = (err, res) => {
+module.exports = (err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
   const payload = {
     error: {
