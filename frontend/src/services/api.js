@@ -11,6 +11,12 @@ const api = axios.create({
   }
 });
 
+let logoutHandler = null;
+
+export function setLogoutHandler(fn) {
+  logoutHandler = fn;
+}
+
 export function setAuthToken(token) {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -26,5 +32,29 @@ export function setDefaultHeader(name, value) {
     api.defaults.headers.common[name] = value;
   }
 }
+
+export function logout() {
+  localStorage.removeItem('token');
+  delete api.defaults.headers.common['Authorization'];
+  if (typeof logoutHandler === 'function') {
+    logoutHandler();
+  } else {
+    window.dispatchEvent(new Event('logout'));
+  }
+}
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err?.response?.status === 401) {
+      if (typeof logoutHandler === 'function') {
+        logoutHandler();
+      } else {
+        window.dispatchEvent(new Event('logout'));
+      }
+    }
+    return Promise.reject(err);
+  }
+);
 
 export default api;

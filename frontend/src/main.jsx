@@ -3,15 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import { RouterProvider } from 'react-router-dom'
 import router from './app/router'
-import { setAuthToken } from './services/api'
-
-const token = localStorage.getItem('token')
-if (token) {
-  setAuthToken(token)
-}
+import { AuthProvider } from './contexts/AuthContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 )

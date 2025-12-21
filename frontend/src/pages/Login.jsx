@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { setAuthToken } from "../services/api";
+import api from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import "../styles/Login.css";
 
 function isValidEmail(email) {
@@ -13,6 +14,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +26,7 @@ export default function Login() {
       const res = await api.post("/auth/login", { email, password });
       const token = res?.data?.token;
       if (token) {
-        localStorage.setItem("token", token);
-        setAuthToken(token);
+        login(token); // met à jour le contexte + stocke le token
         navigate("/");
       } else {
         setError("Réponse inattendue du serveur");
