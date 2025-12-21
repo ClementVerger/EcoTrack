@@ -1,14 +1,14 @@
-module.exports = (err, res) => {
+module.exports = (err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
   const payload = {
     error: {
       status,
-      message: err.message || 'Internal Server Error',
-      timestamp: new Date().toISOString()
-    }
+      message: err.message || "Internal Server Error",
+      timestamp: new Date().toISOString(),
+    },
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     payload.error.stack = err.stack;
     if (err.details) payload.error.details = err.details;
   }

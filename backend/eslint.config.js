@@ -19,7 +19,10 @@ module.exports = [
     rules: {
       // tes règles de base
       "no-undef": "error",
-      "no-unused-vars": ["warn", { args: "after-used", argsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        { args: "after-used", argsIgnorePattern: "^_" },
+      ],
     },
   },
 ];
