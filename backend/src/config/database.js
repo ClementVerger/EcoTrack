@@ -1,6 +1,8 @@
 // src/config/database.js
 const { Sequelize } = require("sequelize");
 const buildUser = require("../models/user.model");
+const buildContainer = require("../models/container.model");
+const buildReport = require("../models/report.model");
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || "ecotrack",
@@ -18,7 +20,30 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// init models
+// Init models
 db.User = buildUser(sequelize);
+db.Container = buildContainer(sequelize);
+db.Report = buildReport(sequelize);
+
+// Définir les associations
+// User -> Reports (1:N)
+db.User.hasMany(db.Report, {
+  foreignKey: "userId",
+  as: "reports",
+});
+db.Report.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+// Container -> Reports (1:N)
+db.Container.hasMany(db.Report, {
+  foreignKey: "containerId",
+  as: "reports",
+});
+db.Report.belongsTo(db.Container, {
+  foreignKey: "containerId",
+  as: "container",
+});
 
 module.exports = db;
