@@ -1,5 +1,30 @@
 // src/services/report.service.js
+const { Op } = require("sequelize");
 const db = require("../config/database");
+
+// Délai anti-doublon en millisecondes (1 heure)
+const DUPLICATE_DELAY_MS = 60 * 60 * 1000;
+
+/**
+ * Vérifie si un signalement similaire existe déjà (anti-doublon)
+ * @param {string} userId - ID de l'utilisateur
+ * @param {string} containerId - ID du conteneur
+ * @returns {Promise<Object|null>} Le signalement existant ou null
+ */
+const findRecentDuplicate = async (userId, containerId) => {
+  const oneHourAgo = new Date(Date.now() - DUPLICATE_DELAY_MS);
+
+  return db.Report.findOne({
+    where: {
+      userId,
+      containerId,
+      createdAt: {
+        [Op.gte]: oneHourAgo, // createdAt >= (now - 1h)
+      },
+    },
+    order: [["createdAt", "DESC"]],
+  });
+};
 
 /**
  * Créer un nouveau signalement
@@ -9,6 +34,7 @@ const db = require("../config/database");
  * @param {number} data.latitude - Latitude GPS
  * @param {number} data.longitude - Longitude GPS
  * @returns {Promise<Object>} Le signalement créé avec ses relations
+ * @throws {Error} Si doublon détecté ou conteneur non trouvé
  */
 exports.createReport = async ({ userId, containerId, latitude, longitude }) => {
   // Vérifier que le conteneur existe
@@ -16,6 +42,21 @@ exports.createReport = async ({ userId, containerId, latitude, longitude }) => {
   if (!container) {
     const error = new Error("Conteneur non trouvé");
     error.statusCode = 404;
+    throw error;
+  }
+
+  // Vérifier les doublons (même user, même container, < 1h)
+  const existingReport = await findRecentDuplicate(userId, containerId);
+  if (existingReport) {
+    const minutesAgo = Math.round((Date.now() - existingReport.createdAt.getTime()) / 60000);
+    const minutesRemaining = 60 - minutesAgo;
+    
+    const error = new Error(
+      `Vous avez déjà signalé ce conteneur il y a ${minutesAgo} minute(s). ` +
+      `Veuillez attendre ${minutesRemaining} minute(s) avant de signaler à nouveau.`
+    );
+    error.statusCode = 429; // Too Many Requests
+    error.existingReportId = existingReport.id;
     throw error;
   }
 
