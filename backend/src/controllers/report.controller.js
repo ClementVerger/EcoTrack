@@ -18,14 +18,12 @@ exports.createReport = async (req, res, next) => {
     });
 
     return res.status(201).json({
+      success: true,
       message: "Signalement créé avec succès",
-      report,
+      data: { report },
     });
   } catch (err) {
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    return next(err);
+    return next(err); // Déléguer au middleware d'erreur centralisé
   }
 };
 
@@ -38,8 +36,11 @@ exports.getAllReports = async (req, res, next) => {
     const reports = await reportService.getAllReports();
 
     return res.status(200).json({
-      count: reports.length,
-      reports,
+      success: true,
+      data: {
+        count: reports.length,
+        reports,
+      },
     });
   } catch (err) {
     return next(err);
@@ -56,8 +57,11 @@ exports.getMyReports = async (req, res, next) => {
     const reports = await reportService.getReportsByUser(userId);
 
     return res.status(200).json({
-      count: reports.length,
-      reports,
+      success: true,
+      data: {
+        count: reports.length,
+        reports,
+      },
     });
   } catch (err) {
     return next(err);

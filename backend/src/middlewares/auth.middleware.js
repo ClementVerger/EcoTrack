@@ -1,15 +1,22 @@
 const jwtService = require("../services/jwt.service");
+const { UnauthorizedError, ErrorCodes } = require("../utils/errors");
 
 module.exports = (req, res, next) => {
   try {
     const authHeader = req.get("authorization") || req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ message: "Authorization header manquant" });
+      throw new UnauthorizedError(
+        "Token d'authentification requis",
+        ErrorCodes.TOKEN_MISSING
+      );
     }
 
     const parts = authHeader.split(" ");
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-      return res.status(401).json({ message: "Format Authorization invalide (attendu: Bearer <token>)" });
+      throw new UnauthorizedError(
+        "Format d'autorisation invalide (attendu: Bearer <token>)",
+        ErrorCodes.TOKEN_INVALID
+      );
     }
 
     const token = parts[1];
@@ -18,12 +25,9 @@ module.exports = (req, res, next) => {
       payload = jwtService.verifyToken(token);
     } catch (err) {
       if (err.code === "TOKEN_EXPIRED") {
-        return res.status(401).json({ message: "Token expiré" });
+        throw new UnauthorizedError("Token expiré", ErrorCodes.TOKEN_EXPIRED);
       }
-      if (err.code === "TOKEN_INVALID") {
-        return res.status(401).json({ message: "Token invalide" });
-      }
-      return next(err);
+      throw new UnauthorizedError("Token invalide", ErrorCodes.TOKEN_INVALID);
     }
 
     req.user = { id: payload.userId, role: payload.role };

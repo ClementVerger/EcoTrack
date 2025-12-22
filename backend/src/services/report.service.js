@@ -1,6 +1,7 @@
 // src/services/report.service.js
 const { Op } = require("sequelize");
 const db = require("../config/database");
+const { NotFoundError, TooManyRequestsError, ErrorCodes } = require("../utils/errors");
 
 // Délai anti-doublon en millisecondes (1 heure)
 const DUPLICATE_DELAY_MS = 60 * 60 * 1000;
@@ -19,7 +20,7 @@ const findRecentDuplicate = async (userId, containerId) => {
       userId,
       containerId,
       createdAt: {
-        [Op.gte]: oneHourAgo, // createdAt >= (now - 1h)
+        [Op.gte]: oneHourAgo,
       },
     },
     order: [["createdAt", "DESC"]],
@@ -34,30 +35,34 @@ const findRecentDuplicate = async (userId, containerId) => {
  * @param {number} data.latitude - Latitude GPS
  * @param {number} data.longitude - Longitude GPS
  * @returns {Promise<Object>} Le signalement créé avec ses relations
- * @throws {Error} Si doublon détecté ou conteneur non trouvé
+ * @throws {NotFoundError} Si conteneur non trouvé
+ * @throws {TooManyRequestsError} Si doublon détecté
  */
 exports.createReport = async ({ userId, containerId, latitude, longitude }) => {
   // Vérifier que le conteneur existe
   const container = await db.Container.findByPk(containerId);
   if (!container) {
-    const error = new Error("Conteneur non trouvé");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError(
+      "Conteneur non trouvé",
+      ErrorCodes.CONTAINER_NOT_FOUND
+    );
   }
 
   // Vérifier les doublons (même user, même container, < 1h)
   const existingReport = await findRecentDuplicate(userId, containerId);
   if (existingReport) {
-    const minutesAgo = Math.round((Date.now() - existingReport.createdAt.getTime()) / 60000);
-    const minutesRemaining = 60 - minutesAgo;
-    
-    const error = new Error(
-      `Vous avez déjà signalé ce conteneur il y a ${minutesAgo} minute(s). ` +
-      `Veuillez attendre ${minutesRemaining} minute(s) avant de signaler à nouveau.`
+    const minutesAgo = Math.round(
+      (Date.now() - existingReport.createdAt.getTime()) / 60000
     );
-    error.statusCode = 429; // Too Many Requests
-    error.existingReportId = existingReport.id;
-    throw error;
+    const minutesRemaining = Math.max(1, 60 - minutesAgo);
+    const secondsRemaining = minutesRemaining * 60;
+
+    throw new TooManyRequestsError(
+      `Vous avez déjà signalé ce conteneur il y a ${minutesAgo} minute(s). ` +
+        `Veuillez attendre ${minutesRemaining} minute(s) avant de signaler à nouveau.`,
+      ErrorCodes.REPORT_DUPLICATE,
+      secondsRemaining
+    );
   }
 
   // Créer le signalement
