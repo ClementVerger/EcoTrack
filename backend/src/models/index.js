@@ -5,5 +5,9 @@ module.exports = {
   Container: db.Container,
   Report: db.Report,
   PointHistory: db.PointHistory,
+  Badge: db.Badge,
+  UserBadge: db.UserBadge,
+  Level: db.Level,
+  RewardHistory: db.RewardHistory,
   db,
 };

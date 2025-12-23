@@ -3,9 +3,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Créer le type ENUM pour reason
+    const tables = await queryInterface.showAllTables();
+    
+    if (tables.includes("point_history")) {
+      console.log("Table 'point_history' already exists, skipping.");
+      return;
+    }
+
+    // Créer le type ENUM pour reason (avec gestion du cas existant)
     await queryInterface.sequelize.query(`
-      CREATE TYPE "enum_point_history_reason" AS ENUM ('report_validated', 'bonus', 'penalty', 'other');
+      DO $$ BEGIN
+        CREATE TYPE "enum_point_history_reason" AS ENUM ('report_validated', 'bonus', 'penalty', 'other');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     // Créer la table point_history
