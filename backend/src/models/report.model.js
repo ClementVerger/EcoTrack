@@ -29,6 +29,12 @@ module.exports = (sequelize) => {
         defaultValue: "CONTENEUR_PLEIN",
       },
 
+      status: {
+        type: DataTypes.ENUM("pending", "validated", "rejected"),
+        allowNull: false,
+        defaultValue: "pending",
+      },
+
       latitude: {
         type: DataTypes.FLOAT,
         allowNull: false,
@@ -45,6 +51,18 @@ module.exports = (sequelize) => {
           min: -180,
           max: 180,
         },
+      },
+
+      validatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: "validated_at",
+      },
+
+      validatedBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        field: "validated_by",
       },
     },
     {

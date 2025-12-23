@@ -1,7 +1,8 @@
 // src/services/report.service.js
 const { Op } = require("sequelize");
 const db = require("../config/database");
-const { NotFoundError, TooManyRequestsError, ErrorCodes } = require("../utils/errors");
+const { NotFoundError, TooManyRequestsError, BadRequestError, ErrorCodes } = require("../utils/errors");
+const pointService = require("./point.service");
 
 // Délai anti-doublon en millisecondes (1 heure)
 const DUPLICATE_DELAY_MS = 60 * 60 * 1000;
@@ -70,6 +71,7 @@ exports.createReport = async ({ userId, containerId, latitude, longitude }) => {
     userId,
     containerId,
     type: "CONTENEUR_PLEIN",
+    status: "pending",
     latitude,
     longitude,
   });
@@ -90,11 +92,119 @@ exports.createReport = async ({ userId, containerId, latitude, longitude }) => {
 };
 
 /**
+ * Valider un signalement et attribuer les points à l'utilisateur
+ * @param {string} reportId - ID du signalement
+ * @param {string} adminId - ID de l'admin qui valide
+ * @returns {Promise<Object>} Le signalement mis à jour
+ * @throws {NotFoundError} Si signalement non trouvé
+ * @throws {BadRequestError} Si signalement déjà traité
+ */
+exports.validateReport = async (reportId, adminId) => {
+  const report = await db.Report.findByPk(reportId);
+  
+  if (!report) {
+    throw new NotFoundError("Signalement non trouvé", ErrorCodes.REPORT_NOT_FOUND);
+  }
+
+  if (report.status !== "pending") {
+    throw new BadRequestError(
+      `Ce signalement a déjà été traité (status: ${report.status})`,
+      ErrorCodes.REPORT_ALREADY_PROCESSED
+    );
+  }
+
+  // Utiliser une transaction pour garantir la cohérence
+  const transaction = await db.sequelize.transaction();
+
+  try {
+    // Mettre à jour le signalement
+    await report.update(
+      {
+        status: "validated",
+        validatedAt: new Date(),
+        validatedBy: adminId,
+      },
+      { transaction }
+    );
+
+    // Créditer les points à l'utilisateur
+    await pointService.creditReportPoints(report.userId, reportId, transaction);
+
+    await transaction.commit();
+
+    // Retourner le signalement avec les relations
+    return db.Report.findByPk(reportId, {
+      include: [
+        {
+          association: "user",
+          attributes: ["id", "firstname", "lastname", "email", "points"],
+        },
+        {
+          association: "container",
+          attributes: ["id", "type", "status"],
+        },
+      ],
+    });
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Rejeter un signalement
+ * @param {string} reportId - ID du signalement
+ * @param {string} adminId - ID de l'admin qui rejette
+ * @returns {Promise<Object>} Le signalement mis à jour
+ */
+exports.rejectReport = async (reportId, adminId) => {
+  const report = await db.Report.findByPk(reportId);
+  
+  if (!report) {
+    throw new NotFoundError("Signalement non trouvé", ErrorCodes.REPORT_NOT_FOUND);
+  }
+
+  if (report.status !== "pending") {
+    throw new BadRequestError(
+      `Ce signalement a déjà été traité (status: ${report.status})`,
+      ErrorCodes.REPORT_ALREADY_PROCESSED
+    );
+  }
+
+  await report.update({
+    status: "rejected",
+    validatedAt: new Date(),
+    validatedBy: adminId,
+  });
+
+  return db.Report.findByPk(reportId, {
+    include: [
+      {
+        association: "user",
+        attributes: ["id", "firstname", "lastname", "email"],
+      },
+      {
+        association: "container",
+        attributes: ["id", "type", "status"],
+      },
+    ],
+  });
+};
+
+/**
  * Récupérer tous les signalements
+ * @param {Object} [filters] - Filtres optionnels
+ * @param {string} [filters.status] - Filtrer par status
  * @returns {Promise<Array>} Liste des signalements
  */
-exports.getAllReports = async () => {
+exports.getAllReports = async (filters = {}) => {
+  const where = {};
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
   return db.Report.findAll({
+    where,
     include: [
       {
         association: "user",

@@ -28,12 +28,55 @@ exports.createReport = async (req, res, next) => {
 };
 
 /**
+ * PUT /reports/:id/validate
+ * Valider un signalement (Admin requis)
+ */
+exports.validateReport = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user.id;
+
+    const report = await reportService.validateReport(id, adminId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Signalement validé avec succès. 10 points attribués à l'utilisateur.",
+      data: { report },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
+ * PUT /reports/:id/reject
+ * Rejeter un signalement (Admin requis)
+ */
+exports.rejectReport = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user.id;
+
+    const report = await reportService.rejectReport(id, adminId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Signalement rejeté",
+      data: { report },
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
  * GET /reports
  * Récupérer tous les signalements (JWT requis)
  */
 exports.getAllReports = async (req, res, next) => {
   try {
-    const reports = await reportService.getAllReports();
+    const { status } = req.query;
+    const reports = await reportService.getAllReports({ status });
 
     return res.status(200).json({
       success: true,
