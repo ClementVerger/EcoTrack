@@ -22,6 +22,8 @@ module.exports = (sequelize) => {
       role: { type: DataTypes.ENUM("user", "admin"), allowNull: false, defaultValue: "user" },
 
       isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true, field: "is_active" },
+
+      points: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0, validate: { min: 0 } },
     },
     {
       tableName: "users",
