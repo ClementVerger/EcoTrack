@@ -36,12 +36,20 @@ exports.validateReport = async (req, res, next) => {
     const { id } = req.params;
     const adminId = req.user.id;
 
-    const report = await reportService.validateReport(id, adminId);
+    const { report, rewards } = await reportService.validateReport(id, adminId);
+
+    const messages = ["Signalement validé avec succès. 10 points attribués."];
+    if (rewards && rewards.badges && rewards.badges.length > 0) {
+      messages.push(`Nouveau(x) badge(s) obtenu(s): ${rewards.badges.map((b) => b.name).join(", ")}`);
+    }
+    if (rewards && rewards.levelUp) {
+      messages.push(`Niveau supérieur atteint: ${rewards.levelUp.name} (niveau ${rewards.levelUp.level})`);
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Signalement validé avec succès. 10 points attribués à l'utilisateur.",
-      data: { report },
+      message: messages.join(" "),
+      data: { report, rewards },
     });
   } catch (err) {
     return next(err);

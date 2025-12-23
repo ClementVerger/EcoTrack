@@ -15,6 +15,14 @@ function makeApp() {
   a.get("/protected", authMiddleware, (req, res) =>
     res.json({ ok: true, userId: req.userId, role: req.user?.role })
   );
+  // Middleware d'erreur pour capturer les erreurs
+  a.use((err, req, res, next) => {
+    res.status(err.statusCode || 500).json({
+      success: false,
+      message: err.message,
+      code: err.code
+    });
+  });
   return a;
 }
 
@@ -40,7 +48,7 @@ describe("Auth middleware", () => {
     const app = makeApp();
     const res = await request(app).get("/protected");
     expect(res.status).toBe(401);
-    expect(res.body.message).toMatch(/Authorization header manquant/i);
+    expect(res.body.message).toMatch(/Token d'authentification requis/i);
   });
 
   test("❌ 401 si token invalide", async () => {

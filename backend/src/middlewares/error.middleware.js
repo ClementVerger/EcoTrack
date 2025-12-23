@@ -5,11 +5,13 @@ const { AppError, ValidationError } = require("../utils/errors");
  * Middleware de gestion centralisée des erreurs
  */
 module.exports = (err, req, res, next) => {
-  // Log de l'erreur (en dev uniquement pour le stack)
-  if (process.env.NODE_ENV === "development") {
-    console.error("❌ Error:", err);
-  } else {
-    console.error("❌ Error:", err.message);
+  // Ne pas logger en environnement de test
+  if (process.env.NODE_ENV !== "test") {
+    if (process.env.NODE_ENV === "development") {
+      console.error("❌ Error:", err);
+    } else {
+      console.error("❌ Error:", err.message);
+    }
   }
 
   // Erreurs Sequelize - Validation
