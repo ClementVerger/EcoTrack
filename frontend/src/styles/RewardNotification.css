@@ -1,0 +1,329 @@
+/* Container des notifications */
+.notification-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Notification individuelle */
+.notification {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Container de l'icône */
+.notification__icon-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+
+.notification__icon {
+  font-size: 1.5rem;
+  z-index: 1;
+}
+
+/* Effet de glow pour les récompenses */
+.notification__icon-glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Contenu */
+.notification__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification__title {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.notification__message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Bouton fermer */
+.notification__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.notification__close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Barre de progression */
+.notification__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.3;
+  animation: progress linear forwards;
+  width: 100%;
+}
+
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* ===== STYLES PAR TYPE ===== */
+
+/* Success */
+.notification--success {
+  border-left: 4px solid #4caf50;
+}
+.notification--success .notification__icon-container {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+.notification--success .notification__progress {
+  background: #4caf50;
+}
+
+/* Error */
+.notification--error {
+  border-left: 4px solid #f44336;
+}
+.notification--error .notification__icon-container {
+  background: #ffebee;
+  color: #f44336;
+}
+.notification--error .notification__progress {
+  background: #f44336;
+}
+
+/* Warning */
+.notification--warning {
+  border-left: 4px solid #ff9800;
+}
+.notification--warning .notification__icon-container {
+  background: #fff3e0;
+  color: #ff9800;
+}
+.notification--warning .notification__progress {
+  background: #ff9800;
+}
+
+/* Info */
+.notification--info {
+  border-left: 4px solid #2196f3;
+}
+.notification--info .notification__icon-container {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+.notification--info .notification__progress {
+  background: #2196f3;
+}
+
+/* ===== STYLES RÉCOMPENSES ===== */
+
+/* Style commun récompenses */
+.notification--reward-type {
+  border-left: none;
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #ffd700, #ff9800, #ff5722) border-box;
+}
+
+.notification--reward-type .notification__icon-glow {
+  background: linear-gradient(135deg, #ffd700, #ff9800);
+  opacity: 0.6;
+}
+
+/* Points */
+.notification--points {
+  background: linear-gradient(135deg, #fffde7 0%, #fff8e1 100%);
+  border: 2px solid #ffd700;
+}
+.notification--points .notification__icon-container {
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+.notification--points .notification__title {
+  color: #f57f17;
+}
+.notification--points .notification__progress {
+  background: linear-gradient(90deg, #ffd700, #ffb300);
+}
+
+/* Badge */
+.notification--badge {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border: 2px solid #9c27b0;
+}
+.notification--badge .notification__icon-container {
+  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+  animation: badgeBounce 0.6s ease-out;
+}
+.notification--badge .notification__title {
+  color: #7b1fa2;
+}
+.notification--badge .notification__progress {
+  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+}
+
+@keyframes badgeBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Level Up */
+.notification--level-up {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 2px solid #4caf50;
+  animation: levelUpShine 0.8s ease-out;
+}
+.notification--level-up .notification__icon-container {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+  animation: levelUpPop 0.5s ease-out;
+}
+.notification--level-up .notification__title {
+  color: #2e7d32;
+}
+.notification--level-up .notification__progress {
+  background: linear-gradient(90deg, #4caf50, #2e7d32);
+}
+
+@keyframes levelUpPop {
+  0% { transform: scale(0) rotate(-180deg); }
+  60% { transform: scale(1.3) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes levelUpShine {
+  0% { 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  50% { 
+    box-shadow: 0 4px 30px rgba(76, 175, 80, 0.5), 
+                0 0 60px rgba(76, 175, 80, 0.3);
+  }
+  100% { 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Récompense générique */
+.notification--reward .notification__icon-container {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+.notification--reward .notification__title {
+  color: #e65100;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .notification-container {
+    top: auto;
+    bottom: 20px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .notification {
+    padding: 12px;
+  }
+
+  .notification__icon-container {
+    width: 38px;
+    height: 38px;
+  }
+
+  .notification__icon {
+    font-size: 1.25rem;
+  }
+
+  .notification__title {
+    font-size: 0.95rem;
+  }
+
+  .notification__message {
+    font-size: 0.85rem;
+  }
+}
