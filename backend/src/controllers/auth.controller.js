@@ -56,6 +56,8 @@ exports.register = async (req, res, next) => {
         email: user.email,
         role: user.role,
         isActive: user.isActive,
+        points: user.points,
+        level: user.level,
         createdAt: user.createdAt,
       },
     });
@@ -107,6 +109,8 @@ exports.login = async (req, res, next) => {
       email: user.email,
       role: user.role,
       isActive: user.isActive,
+      points: user.points,
+      level: user.level,
       createdAt: user.createdAt,
     };
 
@@ -114,6 +118,46 @@ exports.login = async (req, res, next) => {
       message: "Authentification réussie",
       token,
       user: safeUser,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
+ * GET /auth/me
+ * Récupérer le profil de l'utilisateur connecté
+ */
+exports.getProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "firstname", "lastname", "email", "role", "isActive", "points", "level", "createdAt"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Utilisateur non trouvé" 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          role: user.role,
+          isActive: user.isActive,
+          points: user.points,
+          level: user.level,
+          createdAt: user.createdAt,
+        },
+      },
     });
   } catch (err) {
     return next(err);

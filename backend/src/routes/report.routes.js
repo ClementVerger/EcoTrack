@@ -2,6 +2,7 @@
 const express = require("express");
 const reportController = require("../controllers/report.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
+const adminMiddleware = require("../middlewares/admin.middleware");
 const { reportValidation } = require("../middlewares/validate.middleware");
 
 const router = express.Router();
@@ -18,10 +19,10 @@ router.get("/", reportController.getAllReports);
 // GET /reports/me - Signalements de l'utilisateur connecté
 router.get("/me", reportController.getMyReports);
 
-// PUT /reports/:id/validate - Valider un signalement (Admin)
-router.put("/:id/validate", reportController.validateReport);
+// PUT /reports/:id/validate - Valider un signalement (Admin uniquement)
+router.put("/:id/validate", adminMiddleware, reportController.validateReport);
 
-// PUT /reports/:id/reject - Rejeter un signalement (Admin)
-router.put("/:id/reject", reportController.rejectReport);
+// PUT /reports/:id/reject - Rejeter un signalement (Admin uniquement)
+router.put("/:id/reject", adminMiddleware, reportController.rejectReport);
 
 module.exports = router;

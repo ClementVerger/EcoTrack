@@ -25,8 +25,9 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", { email, password });
       const token = res?.data?.token;
+      const userData = res?.data?.user;
       if (token) {
-        login(token); // met à jour le contexte + stocke le token
+        login(token, userData); // met à jour le contexte + stocke le token + données utilisateur
         navigate("/");
       } else {
         setError("Réponse inattendue du serveur");

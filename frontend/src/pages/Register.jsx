@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import '../styles/Register.css'
 
 function isValidEmail(email) {
@@ -16,6 +17,7 @@ export default function Register() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const validate = () => {
     if (!firstname || firstname.trim().length < 2) return 'Prénom trop court'
@@ -33,13 +35,20 @@ export default function Register() {
     if (v) return setError(v)
     setLoading(true)
     try {
-      await api.post('/auth/register', {
+      const res = await api.post('/auth/register', {
         firstname: firstname.trim(),
         lastname: lastname.trim(),
         email: email.trim().toLowerCase(),
         password,
       })
-      navigate('/login')
+      const token = res?.data?.token
+      const userData = res?.data?.user
+      if (token) {
+        login(token, userData) // Connexion automatique après inscription
+        navigate('/')
+      } else {
+        navigate('/login')
+      }
     } catch (err) {
       setError(err?.response?.data?.message || 'Erreur lors de l\'inscription')
     } finally {
