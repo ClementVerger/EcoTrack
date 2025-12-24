@@ -2,6 +2,7 @@
 const { Op } = require("sequelize");
 const db = require("../config/database");
 const pointService = require("./point.service");
+const analyticsService = require("./analytics.service");
 
 /**
  * Vérifier et attribuer les badges éligibles à un utilisateur
@@ -97,6 +98,10 @@ const checkAndAwardBadges = async (userId, transaction = null) => {
         });
       }
 
+      // Tracker l'événement analytics (async, non bloquant)
+      analyticsService.trackBadgeEarned(userId, badge.code, badge.name, badge.pointsReward)
+        .catch((err) => console.error("Analytics tracking error:", err));
+
       newBadges.push(badge);
     }
   }
@@ -143,6 +148,10 @@ const checkAndUpdateLevel = async (userId, transaction = null) => {
     },
     { transaction }
   );
+
+  // Tracker l'événement analytics (async, non bloquant)
+  analyticsService.trackLevelUp(userId, newLevel.levelNumber, newLevel.name, oldLevel)
+    .catch((err) => console.error("Analytics tracking error:", err));
 
   return newLevel;
 };

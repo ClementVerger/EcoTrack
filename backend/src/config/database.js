@@ -8,6 +8,7 @@ const buildBadge = require("../models/badge.model");
 const buildUserBadge = require("../models/userBadge.model");
 const buildLevel = require("../models/level.model");
 const buildRewardHistory = require("../models/rewardHistory.model");
+const buildGamificationAnalytics = require("../models/gamificationAnalytics.model");
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || "ecotrack",
@@ -34,6 +35,7 @@ db.Badge = buildBadge(sequelize);
 db.UserBadge = buildUserBadge(sequelize);
 db.Level = buildLevel(sequelize);
 db.RewardHistory = buildRewardHistory(sequelize);
+db.GamificationAnalytics = buildGamificationAnalytics(sequelize);
 
 // ============================================
 // Associations
@@ -109,6 +111,16 @@ db.User.hasMany(db.RewardHistory, {
   as: "rewardHistory",
 });
 db.RewardHistory.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+// User -> GamificationAnalytics (1:N)
+db.User.hasMany(db.GamificationAnalytics, {
+  foreignKey: "userId",
+  as: "analyticsEvents",
+});
+db.GamificationAnalytics.belongsTo(db.User, {
   foreignKey: "userId",
   as: "user",
 });

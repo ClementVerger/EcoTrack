@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import api from '../services/api';
 
 const NotificationContext = createContext(null);
 
@@ -14,10 +15,27 @@ export const NOTIFICATION_TYPES = {
   POINTS: 'points',      // Pour les points gagnés
 };
 
+// Générer un ID de session unique pour le tracking
+const generateSessionId = () => {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
 let notificationId = 0;
 
 export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
+  const sessionIdRef = useRef(generateSessionId());
+
+  // Fonction pour tracker les événements analytics (non bloquant)
+  const trackAnalytics = useCallback((eventType, eventData = {}) => {
+    api.post('/analytics/track', {
+      eventType,
+      eventData,
+      sessionId: sessionIdRef.current,
+    }).catch(() => {
+      // Silencieux en cas d'erreur pour ne pas impacter l'UX
+    });
+  }, []);
 
   // Ajouter une notification
   const addNotification = useCallback((notification) => {
@@ -31,6 +49,16 @@ export function NotificationProvider({ children }) {
 
     setNotifications((prev) => [...prev, newNotification]);
 
+    // Tracker l'affichage de la notification si c'est une récompense
+    const rewardTypes = [NOTIFICATION_TYPES.POINTS, NOTIFICATION_TYPES.BADGE, NOTIFICATION_TYPES.LEVEL_UP, NOTIFICATION_TYPES.REWARD];
+    if (rewardTypes.includes(newNotification.type)) {
+      trackAnalytics('notification_displayed', {
+        notificationType: newNotification.type,
+        title: newNotification.title,
+        message: newNotification.message,
+      });
+    }
+
     // Auto-suppression après la durée spécifiée
     if (newNotification.duration > 0) {
       setTimeout(() => {
@@ -39,12 +67,24 @@ export function NotificationProvider({ children }) {
     }
 
     return id;
-  }, []);
+  }, [trackAnalytics]);
 
-  // Supprimer une notification
-  const removeNotification = useCallback((id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+  // Supprimer une notification (fermée manuellement ou auto)
+  const removeNotification = useCallback((id, wasClicked = false) => {
+    setNotifications((prev) => {
+      const notification = prev.find(n => n.id === id);
+      if (notification) {
+        const rewardTypes = [NOTIFICATION_TYPES.POINTS, NOTIFICATION_TYPES.BADGE, NOTIFICATION_TYPES.LEVEL_UP, NOTIFICATION_TYPES.REWARD];
+        if (rewardTypes.includes(notification.type)) {
+          trackAnalytics(wasClicked ? 'notification_clicked' : 'notification_dismissed', {
+            notificationType: notification.type,
+            title: notification.title,
+          });
+        }
+      }
+      return prev.filter((n) => n.id !== id);
+    });
+  }, [trackAnalytics]);
 
   // Raccourcis pour les types courants
   const notify = {
@@ -116,7 +156,7 @@ export function NotificationProvider({ children }) {
   };
 
   return (
-    <NotificationContext.Provider value={{ notifications, addNotification, removeNotification, notify }}>
+    <NotificationContext.Provider value={{ notifications, addNotification, removeNotification, notify, trackAnalytics }}>
       {children}
     </NotificationContext.Provider>
   );

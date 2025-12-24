@@ -1,6 +1,7 @@
 // src/services/point.service.js
 const db = require("../config/database");
 const { NotFoundError, ErrorCodes } = require("../utils/errors");
+const analyticsService = require("./analytics.service");
 
 // Points attribués pour un signalement validé
 const POINTS_PER_VALID_REPORT = 10;
@@ -47,6 +48,14 @@ const addPoints = async ({
     },
     { transaction }
   );
+
+  // Tracker l'événement analytics (async, non bloquant)
+  analyticsService.trackPointsEarned(userId, points, reason, {
+    description,
+    referenceId,
+    referenceType,
+    newTotal: newPoints,
+  }).catch((err) => console.error("Analytics tracking error:", err));
 
   return historyEntry;
 };

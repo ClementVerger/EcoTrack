@@ -9,5 +9,6 @@ module.exports = {
   UserBadge: db.UserBadge,
   Level: db.Level,
   RewardHistory: db.RewardHistory,
+  GamificationAnalytics: db.GamificationAnalytics,
   db,
 };
