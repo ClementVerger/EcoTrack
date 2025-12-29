@@ -1,1 +1,1 @@
-export { default as RewardNotification } from './RewardNotification';
+export { default as RewardNotification } from "./RewardNotification";

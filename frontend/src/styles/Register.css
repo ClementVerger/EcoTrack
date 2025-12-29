@@ -1,5 +1,25 @@
-.register-page { display:flex; justify-content:center; padding:2rem }
-.register-form { width:360px; display:flex; flex-direction:column; gap:0.75rem }
-.register-form input { padding:0.5rem; border:1px solid #ccc; border-radius:4px }
-.register-error { color:#b00020; background:#ffecec; padding:0.5rem; border-radius:4px }
-button[disabled] { opacity:0.6 }
+.register-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+.register-form {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.register-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.register-error {
+  color: #b00020;
+  background: #ffecec;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+button[disabled] {
+  opacity: 0.6;
+}

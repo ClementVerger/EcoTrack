@@ -66,7 +66,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.5;
   }
@@ -197,8 +198,9 @@
 .notification--reward-type {
   border-left: none;
   border: 2px solid transparent;
-  background: linear-gradient(white, white) padding-box,
-              linear-gradient(135deg, #ffd700, #ff9800, #ff5722) border-box;
+  background:
+    linear-gradient(white, white) padding-box,
+    linear-gradient(135deg, #ffd700, #ff9800, #ff5722) border-box;
 }
 
 .notification--reward-type .notification__icon-glow {
@@ -242,10 +244,18 @@
 }
 
 @keyframes badgeBounce {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  70% { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Level Up */
@@ -268,20 +278,27 @@
 }
 
 @keyframes levelUpPop {
-  0% { transform: scale(0) rotate(-180deg); }
-  60% { transform: scale(1.3) rotate(10deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  60% {
+    transform: scale(1.3) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 @keyframes levelUpShine {
-  0% { 
+  0% {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
-  50% { 
-    box-shadow: 0 4px 30px rgba(76, 175, 80, 0.5), 
-                0 0 60px rgba(76, 175, 80, 0.3);
+  50% {
+    box-shadow:
+      0 4px 30px rgba(76, 175, 80, 0.5),
+      0 0 60px rgba(76, 175, 80, 0.3);
   }
-  100% { 
+  100% {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
 }

@@ -1,45 +1,49 @@
-import React from 'react';
-import { useNotification, NOTIFICATION_TYPES } from '../../contexts/NotificationContext';
-import '../../styles/RewardNotification.css';
+import React from "react";
+import {
+  useNotification,
+  NOTIFICATION_TYPES,
+} from "../../contexts/NotificationContext";
+import "../../styles/RewardNotification.css";
 
 // Configuration des styles par type
 const TYPE_CONFIG = {
   [NOTIFICATION_TYPES.SUCCESS]: {
-    className: 'notification--success',
-    defaultIcon: '✓',
+    className: "notification--success",
+    defaultIcon: "✓",
   },
   [NOTIFICATION_TYPES.ERROR]: {
-    className: 'notification--error',
-    defaultIcon: '✕',
+    className: "notification--error",
+    defaultIcon: "✕",
   },
   [NOTIFICATION_TYPES.WARNING]: {
-    className: 'notification--warning',
-    defaultIcon: '⚠',
+    className: "notification--warning",
+    defaultIcon: "⚠",
   },
   [NOTIFICATION_TYPES.INFO]: {
-    className: 'notification--info',
-    defaultIcon: 'ℹ',
+    className: "notification--info",
+    defaultIcon: "ℹ",
   },
   [NOTIFICATION_TYPES.POINTS]: {
-    className: 'notification--points',
-    defaultIcon: '⭐',
+    className: "notification--points",
+    defaultIcon: "⭐",
   },
   [NOTIFICATION_TYPES.BADGE]: {
-    className: 'notification--badge',
-    defaultIcon: '🏆',
+    className: "notification--badge",
+    defaultIcon: "🏆",
   },
   [NOTIFICATION_TYPES.LEVEL_UP]: {
-    className: 'notification--level-up',
-    defaultIcon: '🎉',
+    className: "notification--level-up",
+    defaultIcon: "🎉",
   },
   [NOTIFICATION_TYPES.REWARD]: {
-    className: 'notification--reward',
-    defaultIcon: '🎁',
+    className: "notification--reward",
+    defaultIcon: "🎁",
   },
 };
 
 function NotificationItem({ notification, onClose }) {
-  const config = TYPE_CONFIG[notification.type] || TYPE_CONFIG[NOTIFICATION_TYPES.INFO];
+  const config =
+    TYPE_CONFIG[notification.type] || TYPE_CONFIG[NOTIFICATION_TYPES.INFO];
   const icon = notification.icon || config.defaultIcon;
 
   const isRewardType = [
@@ -50,12 +54,14 @@ function NotificationItem({ notification, onClose }) {
   ].includes(notification.type);
 
   return (
-    <div className={`notification ${config.className} ${isRewardType ? 'notification--reward-type' : ''}`}>
+    <div
+      className={`notification ${config.className} ${isRewardType ? "notification--reward-type" : ""}`}
+    >
       <div className="notification__icon-container">
         <span className="notification__icon">{icon}</span>
         {isRewardType && <div className="notification__icon-glow" />}
       </div>
-      
+
       <div className="notification__content">
         {notification.title && (
           <h4 className="notification__title">{notification.title}</h4>
@@ -63,8 +69,8 @@ function NotificationItem({ notification, onClose }) {
         <p className="notification__message">{notification.message}</p>
       </div>
 
-      <button 
-        className="notification__close" 
+      <button
+        className="notification__close"
         onClick={() => onClose(notification.id)}
         aria-label="Fermer"
       >
@@ -72,7 +78,7 @@ function NotificationItem({ notification, onClose }) {
       </button>
 
       {notification.duration > 0 && (
-        <div 
+        <div
           className="notification__progress"
           style={{ animationDuration: `${notification.duration}ms` }}
         />

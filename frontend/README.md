@@ -1,42 +1,39 @@
 # Frontend
 
-Prérequis
--------
+## Prérequis
 
 - Node (version LTS recommandée)
 
-Installation
-------------
+## Installation
 
 ```bash
 npm i
 ```
 
-Lancement (dev)
-----------------
+## Lancement (dev)
 
 ```bash
 npm run dev
 ```
 
-Build
------
+## Build
 
 ```bash
 npm run build
 ```
 
-Variables d'environnement
-------------------------
+## Variables d'environnement
 
 Copiez l'exemple d'env en local :
 
 Sur macOS / Linux :
+
 ```bash
 cp .env.example .env
 ```
 
 Sur PowerShell / Windows :
+
 ```powershell
 Copy-Item .env.example .env
 ```
@@ -58,4 +55,3 @@ Ne commitez pas votre fichier `.env` local. Ajoutez-le à `.gitignore` si néces
 .env
 .env.local
 ```
-

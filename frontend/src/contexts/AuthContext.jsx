@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import api, { setAuthToken, setLogoutHandler } from '../services/api';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import api, { setAuthToken, setLogoutHandler } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -11,23 +17,23 @@ export function AuthProvider({ children }) {
   // Fonction pour récupérer le profil utilisateur
   const fetchProfile = useCallback(async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get("/auth/me");
       if (response.data.success) {
         setUser(response.data.data.user);
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération du profil:', error);
+      console.error("Erreur lors de la récupération du profil:", error);
       // Si erreur 401, le token est invalide
       if (error?.response?.status === 401) {
         setIsAuthenticated(false);
         setUser(null);
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
       }
     }
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       setAuthToken(token);
       setIsAuthenticated(true);
@@ -39,20 +45,20 @@ export function AuthProvider({ children }) {
       setIsAuthenticated(false);
       setUser(null);
       setAuthToken(null);
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     };
 
-    window.addEventListener('logout', externalLogout);
+    window.addEventListener("logout", externalLogout);
     setLogoutHandler(() => externalLogout);
 
     return () => {
-      window.removeEventListener('logout', externalLogout);
+      window.removeEventListener("logout", externalLogout);
       setLogoutHandler(null);
     };
   }, [fetchProfile]);
 
   const login = (token, userData = null) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem("token", token);
     setAuthToken(token);
     setIsAuthenticated(true);
     if (userData) {
@@ -63,11 +69,11 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setAuthToken(null);
     setIsAuthenticated(false);
     setUser(null);
-    window.dispatchEvent(new Event('logout'));
+    window.dispatchEvent(new Event("logout"));
   };
 
   // Fonction pour rafraîchir les données utilisateur (après une action)
@@ -78,7 +84,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, loading, login, logout, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
