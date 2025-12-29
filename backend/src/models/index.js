@@ -1,7 +1,14 @@
 const db = require("../config/database");
-const User = require("./user.model");
 
 module.exports = {
-  User,
+  User: db.User,
+  Container: db.Container,
+  Report: db.Report,
+  PointHistory: db.PointHistory,
+  Badge: db.Badge,
+  UserBadge: db.UserBadge,
+  Level: db.Level,
+  RewardHistory: db.RewardHistory,
+  GamificationAnalytics: db.GamificationAnalytics,
   db,
 };

@@ -1,4 +1,6 @@
 const { User } = require("../config/database");
+const bcrypt = require("bcrypt");
+const jwtService = require("../services/jwt.service");
 
 const EMAIL_ALREADY_USED = "Cet email est déjà utilisé";
 
@@ -54,6 +56,8 @@ exports.register = async (req, res, next) => {
         email: user.email,
         role: user.role,
         isActive: user.isActive,
+        points: user.points,
+        level: user.level,
         createdAt: user.createdAt,
       },
     });
@@ -62,6 +66,100 @@ exports.register = async (req, res, next) => {
     if (err?.name === "SequelizeUniqueConstraintError") {
       return res.status(409).json({ message: EMAIL_ALREADY_USED });
     }
+    return next(err);
+  }
+};
+
+exports.login = async (req, res, next) => {
+  try {
+    let { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email et mot de passe requis" });
+    }
+
+    email = String(email).trim().toLowerCase();
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: "Email invalide" });
+    }
+
+    // Inclure passwordHash (defaultScope exclut passwordHash)
+    const user = await User.findOne({
+      where: { email },
+      attributes: { include: ["passwordHash"] },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
+    const payload = { userId: user.id, role: user.role };
+    const token = jwtService.generateToken(payload);
+
+    const safeUser = {
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      points: user.points,
+      level: user.level,
+      createdAt: user.createdAt,
+    };
+
+    return res.status(200).json({
+      message: "Authentification réussie",
+      token,
+      user: safeUser,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+/**
+ * GET /auth/me
+ * Récupérer le profil de l'utilisateur connecté
+ */
+exports.getProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "firstname", "lastname", "email", "role", "isActive", "points", "level", "createdAt"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Utilisateur non trouvé" 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          role: user.role,
+          isActive: user.isActive,
+          points: user.points,
+          level: user.level,
+          createdAt: user.createdAt,
+        },
+      },
+    });
+  } catch (err) {
     return next(err);
   }
 };
