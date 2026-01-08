@@ -132,7 +132,7 @@ Tests du service de signalements (actuellement skippés):
 
 ## 📊 Résumé des Tests
 
-```
+```txt
 Test Suites: 4 passed, 1 skipped, 5 total
 Tests:       33 passed, 1 skipped, 34 total
 Snapshots:   0 total
@@ -212,7 +212,7 @@ Tests de résilience:
 
 ## 📝 Ajouter Nouveaux Tests
 
-### Template pour test unitaire:
+### Template pour test unitaire
 
 ```javascript
 describe("Mon Module", () => {
@@ -229,7 +229,7 @@ describe("Mon Module", () => {
 });
 ```
 
-### Template pour test de composant:
+### Template pour test de composant
 
 ```javascript
 describe("MonComposant", () => {
@@ -251,7 +251,7 @@ describe("MonComposant", () => {
 });
 ```
 
-### Template pour test d'intégration async:
+### Template pour test d'intégration async
 
 ```javascript
 it("devrait charger les données avec succès", async () => {

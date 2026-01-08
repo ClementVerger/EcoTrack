@@ -25,15 +25,41 @@ apiClient.interceptors.request.use((config) => {
 
 /**
  * Créer un nouveau signalement
- * @param {Object} reportData
- * @param {string} reportData.containerId - ID du conteneur
- * @param {number} reportData.latitude - Latitude
- * @param {number} reportData.longitude - Longitude
- * @returns {Promise<Object>} Rapport créé
+ * @param {Object} reportData - Données du signalement
+ * @param {string} reportData.description - Description du problème (requis)
+ * @param {string} reportData.category - Catégorie du problème
+ *   - "autre", "conteneur_plein", "conteneur_casse", "conteneur_sale", 
+ *   - "localisation", "conteneur_absent"
+ * @param {string} reportData.severity - Sévérité (basse, normal, haute)
+ * @param {string} [reportData.containerId] - ID du conteneur concerné (optionnel)
+ * @param {number} [reportData.latitude] - Latitude de la position GPS (optionnel)
+ * @param {number} [reportData.longitude] - Longitude de la position GPS (optionnel)
+ * @param {string} [reportData.photo] - Photo encodée en base64 (optionnel)
+ * @returns {Promise<Object>} Rapport créé avec ID et timestamp
+ * @throws {Error} Si la requête échoue
  */
 export const createReport = async (reportData) => {
-  const response = await apiClient.post("/reports", reportData);
-  return response.data.data;
+  try {
+    // Valider les données requises
+    if (!reportData.description || !reportData.category) {
+      throw new Error('Description et catégorie sont obligatoires');
+    }
+
+    const response = await apiClient.post("/reports", reportData);
+    return response.data.data;
+  } catch (error) {
+    // Améliorer le message d'erreur
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    if (error.response?.status === 401) {
+      throw new Error('Vous devez être connecté pour créer un signalement');
+    }
+    if (error.response?.status === 400) {
+      throw new Error('Données invalides. Veuillez vérifier votre formulaire');
+    }
+    throw error;
+  }
 };
 
 /**

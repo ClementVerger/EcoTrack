@@ -164,4 +164,44 @@ describe("Map Component - Tests d'intégration", () => {
       expect(containerService.getAllContainers).toHaveBeenCalled();
     });
   });
+
+  it("devrait afficher le bouton de signalement", async () => {
+    containerService.getAllContainers.mockResolvedValue(mockContainers);
+
+    render(
+      <BrowserRouter>
+        <Map />
+      </BrowserRouter>,
+    );
+
+    await waitFor(() => {
+      expect(containerService.getAllContainers).toHaveBeenCalled();
+    });
+
+    // Le bouton de signalement doit être visible
+    const reportButton = screen.getByTitle("Signaler un problème");
+    expect(reportButton).toBeInTheDocument();
+  });
+
+  it("devrait ouvrir le modal de signalement au clic du bouton", async () => {
+    containerService.getAllContainers.mockResolvedValue(mockContainers);
+
+    const { container } = render(
+      <BrowserRouter>
+        <Map />
+      </BrowserRouter>,
+    );
+
+    await waitFor(() => {
+      expect(containerService.getAllContainers).toHaveBeenCalled();
+    });
+
+    const reportButton = screen.getByTitle("Signaler un problème");
+    reportButton.click();
+
+    await waitFor(() => {
+      const modal = container.querySelector(".report-modal-overlay");
+      expect(modal).toBeInTheDocument();
+    });
+  });
 });

@@ -14,10 +14,12 @@ import "leaflet/dist/leaflet.css";
 import "../../styles/Map.css";
 import { getAllContainers } from "../../services/containerService";
 import { geocodeAddress } from "../../services/geocodingService";
+import { createReport } from "../../services/reportService";
 import { useGeolocation } from "../../hooks/useGeolocation";
 import { filterContainers } from "../../utils/distance";
 import ContainerDetailPanel from "./ContainerDetailPanel";
 import FilterBar from "./FilterBar";
+import ReportModal from "./ReportModal";
 
 // Marqueur utilisateur
 const UserLocationMarker = ({ position }) => {
@@ -148,6 +150,9 @@ export default function Map() {
     status: [],
     distance: 0,
   });
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState(null);
   const searchInputRef = useRef(null);
 
   const {
@@ -226,6 +231,51 @@ export default function Map() {
   const handleReportContainer = async (container) => {
     // Naviguer vers la page de rapport avec le container ID pré-rempli
     navigate(`/reports?containerId=${container.id}&type=${container.type}`);
+  };
+
+  const handleOpenReportModal = () => {
+    setReportModalOpen(true);
+    setReportError(null);
+  };
+
+  const handleCloseReportModal = () => {
+    setReportModalOpen(false);
+    setReportError(null);
+  };
+
+  const handleSubmitReport = async (reportData) => {
+    try {
+      setReportLoading(true);
+      setReportError(null);
+      const result = await createReport(reportData);
+      
+      // Log du succès pour debugging
+      console.log("Signalement créé avec succès:", result);
+      
+      return result;
+    } catch (err) {
+      console.error("Erreur lors de la création du signalement:", err);
+      
+      // Améliorer le message d'erreur selon le type d'erreur
+      let errorMessage = "Erreur lors de l'envoi du signalement. Veuillez réessayer.";
+      
+      if (err.response?.status === 401) {
+        errorMessage = "Vous devez être connecté pour signaler un problème.";
+      } else if (err.response?.status === 403) {
+        errorMessage = "Vous n'avez pas la permission de créer un signalement.";
+      } else if (err.response?.status === 400) {
+        errorMessage = "Données invalides. Veuillez vérifier votre formulaire.";
+      } else if (err.response?.status === 500) {
+        errorMessage = "Erreur serveur. Veuillez réessayer plus tard.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setReportError(errorMessage);
+      throw err;
+    } finally {
+      setReportLoading(false);
+    }
   };
 
   if (loading) {
@@ -467,7 +517,25 @@ export default function Map() {
             {filteredContainers.length}/{containers.length}
           </span>
         </div>
+        <button
+          className="report-btn"
+          onClick={handleOpenReportModal}
+          title="Signaler un problème"
+        >
+          📋
+        </button>
       </div>
+
+      {/* Modal de signalement */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={handleCloseReportModal}
+        onSubmit={handleSubmitReport}
+        isLoading={reportLoading}
+        error={reportError}
+        location={userPosition || selectedSearchResult}
+        containers={containers}
+      />
     </>
   );
 }
